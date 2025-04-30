@@ -1,0 +1,60 @@
+import { describe, expect, test } from '@jest/globals';
+import { isValidISBN } from '../src/utils/isValidISBN';
+import { fetchGoogleBooksData } from '../src/index';
+
+describe('Testing the isValidISBN function', () => {
+  test('Returns true for a valid ISBN-10 as a number', () => {
+    expect(isValidISBN(9780143039976)).toBe(true);
+  });
+
+  test('Returns true for a valid ISBN-13 as a number', () => {
+    expect(isValidISBN(9780374104092)).toBe(true);
+  });
+
+  test('Returns true for a valid ISBN-10 as a string', () => {
+    expect(isValidISBN('9780143039976')).toBe(true);
+  });
+
+  test('Returns true for a valid ISBN-13 as a string', () => {
+    expect(isValidISBN('9780374104092')).toBe(true);
+  });
+
+  test('Returns false for an invalid ISBN-10', () => {
+    expect(isValidISBN(9780143039977)).toBe(false);
+  });
+
+  test('Returns false for an invalid ISBN-13', () => {
+    expect(isValidISBN(9780374104093)).toBe(false);
+  });
+});
+
+describe('Testing the fetchGoogleBooksData function', () => {
+  test('Returns a book with a valid ISBN passed as a number', async () => {
+    const data = await fetchGoogleBooksData(9780143039976);
+    expect(data.title).toBe('We Have Always Lived in the Castle');
+  });
+
+  test('Returns a book with a valid ISBN passed as a string', async () => {
+    const data = await fetchGoogleBooksData('9780374104092');
+    expect(data.title).toBe('Annihilation');
+  });
+
+  test('Returns "City of Saints and Madmen" by Jeff VanderMeer', async () => {
+    const data = await fetchGoogleBooksData('9780374538606');
+
+    expect(data.title).toBe('City of Saints and Madmen');
+    expect(data.authors[0]).toBe('Jeff VanderMeer');
+  });
+
+  test('Returns an error when an invalid ISBN is provided', async () => {
+    await expect(fetchGoogleBooksData(1234567890)).rejects.toThrow(
+      'This is not a valid ISBN',
+    );
+  });
+
+  test('Returns an error when a valid ISBN is passed, but no book is found', async () => {
+    await expect(fetchGoogleBooksData(9780063446137)).rejects.toThrow(
+      'No book found with this ISBN',
+    );
+  });
+});
