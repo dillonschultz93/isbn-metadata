@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 import { isValidISBN } from '../src/utils/isValidISBN';
-import { fetchGoogleBooksData } from '../src/index';
+import { fetchGoogleBooksData, fetchOpenLibraryData } from '../src/index';
 
 describe('Testing the isValidISBN function', () => {
   test('Returns true for a valid ISBN-10 as a number', () => {
@@ -54,6 +54,36 @@ describe('Testing the fetchGoogleBooksData function', () => {
 
   test('Returns an error when a valid ISBN is passed, but no book is found', async () => {
     await expect(fetchGoogleBooksData(9780063446137)).rejects.toThrow(
+      'No book found with this ISBN',
+    );
+  });
+});
+
+describe('Testing the fetchOpenLibraryData function', () => {
+  test('Returns a book with a valid ISBN passed as a number', async () => {
+    const data = await fetchOpenLibraryData(9780062846907);
+    expect(data.title).toBe('The Luminous Dead');
+  });
+
+  test('Returns a book with a valid ISBN passed as a string', async () => {
+    const data = await fetchOpenLibraryData('9781101911815');
+    expect(data.title).toBe('The Memory Police');
+  });
+
+  test('Returns "Sour Cherry" by Natalia Theodoridou', async () => {
+    const data = await fetchOpenLibraryData('9781963108194');
+    expect(data.title).toBe('Sour Cherry');
+    expect(data.authors[0]).toBe('Natalia Theodoridou');
+  });
+
+  test('Returns an error when an valid ISBN is provided', async () => {
+    await expect(fetchOpenLibraryData(1234567890)).rejects.toThrow(
+      'This is not a valid ISBN',
+    );
+  });
+
+  test('Returns an error when a valid ISBN is passed, but no book is found', async () => {
+    await expect(fetchOpenLibraryData(9798662731349)).rejects.toThrow(
       'No book found with this ISBN',
     );
   });
